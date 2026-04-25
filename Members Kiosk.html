@@ -56,9 +56,7 @@
     .stage {
       position: fixed;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      overflow: hidden;
       background:
         radial-gradient(ellipse at 50% 20%, #2a2f2c 0%, #161918 60%, #0d0f0e 100%);
     }
@@ -67,7 +65,11 @@
       width: 1080px;
       height: 1920px;
       background: var(--ivory);
-      position: relative;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -540px;
+      margin-top: -960px;
       overflow: hidden;
       box-shadow: 0 40px 120px rgba(0, 0, 0, .55), 0 0 0 14px #0a0a08, 0 0 0 18px #2a2a22;
       border-radius: 32px;
@@ -2194,6 +2196,16 @@
       display: none
     }
 
+    @media (max-width: 768px) {
+      .demo {
+        top: 8px;
+        right: 8px;
+        min-width: 120px;
+        padding: 10px 12px;
+        font-size: 11px;
+      }
+    }
+
 
     /* Icon defaults */
     .ic-s {
@@ -2211,7 +2223,7 @@
   <!-- Demo controls (outside kiosk frame) -->
   <!-- Controles de demostración (fuera del marco del kiosco) -->
   <div class="demo" id="demo">
-    <h5>Controles de demostración <span class="cl" id="demoCl">—</span></h5>
+    <h5 id="demoToggle" style="cursor:pointer">Controles de demostración <span class="cl" id="demoCl">—</span></h5>
     <div class="grp">
       <button data-act="attract">Ir a pantalla de atracción</button>
       <button data-act="home">Ir a inicio</button>
@@ -3535,20 +3547,29 @@
       if (a === 'warn') { resetIdle(); showWarn(); }
       if (a === 'empty') { state.empty = !state.empty; if (state.screen === 'events') renderEvents(); if (state.screen === 'tee') renderTee(); }
     });
-    document.getElementById('demoCl').addEventListener('click', e => {
+    document.getElementById('demoToggle').addEventListener('click', e => {
       e.stopPropagation();
-      document.getElementById('demo').classList.toggle('collapsed');
-      e.target.textContent = document.getElementById('demo').classList.contains('collapsed') ? '+' : '—';
+      const demo = document.getElementById('demo');
+      demo.classList.toggle('collapsed');
+      document.getElementById('demoCl').textContent = demo.classList.contains('collapsed') ? '+' : '—';
     });
 
     /* ====================== SCALE TO VIEWPORT ====================== */
     function fit() {
       const k = document.getElementById('kiosk');
-      const pad = 40;
+      const isMobile = window.innerWidth < 768;
+      const pad = isMobile ? 0 : 40;
       const sx = (window.innerWidth - pad * 2) / 1080;
       const sy = (window.innerHeight - pad * 2) / 1920;
       const s = Math.min(sx, sy, 1);
       k.style.transform = `scale(${s})`;
+      if (isMobile) {
+        const demo = document.getElementById('demo');
+        if (!demo.classList.contains('collapsed')) {
+          demo.classList.add('collapsed');
+          document.getElementById('demoCl').textContent = '+';
+        }
+      }
     }
     window.addEventListener('resize', fit);
     fit();
